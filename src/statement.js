@@ -57,19 +57,53 @@ renderEnding = (totalAmount, volumeCredits) => {
   return result;
 }
 
-renderInfo = (audience,play) => {
-  return ` ${play.name}: ${formatUSD(caculateAmount(audience, play))} (${audience} seats)\n`;
+renderTxt = (data) => {
+  let result = `Statement for ${data.customer}\n`;
+  for(let i=0;i<data.performances.length;i++){
+    result += ` ${data.plays[data.performances[i].playID].name}: ${data.amounts[i]} (${data.performances[i].audience} seats)\n`;
+  }
+  result+=renderEnding(data.totalAmount,data.totalCredit);
+  return result;
+}
+
+createData=(invoice, plays)=>{
+  const data={
+    customer:invoice.customer,
+    amounts:[],
+    plays:plays,
+    performances:invoice.performances,
+    totalAmount:0,
+    totalCredit:0
+  }
+  for (let perf of invoice.performances) {
+    data.amounts.push(formatUSD(caculateAmount(perf.audience, plays[perf.playID])));
+  }
+  data.totalAmount=caculateTotalAmount(invoice, plays);
+  data.totalCredit= caculateCredit(invoice, plays);
+  return data;
 }
 
 function statement(invoice, plays) {
-  let result = `Statement for ${invoice.customer}\n`;
-  for (let perf of invoice.performances) {
-    result += renderInfo(perf.audience,plays[perf.playID])
+  data=createData(invoice, plays);
+  return renderTxt(data);
+}
+
+function statementHtml(invoice, plays){
+  data=createData(invoice, plays);
+  return renderHtml(data);
+}
+
+renderHtml = (data) =>{
+  let result = `<h1>Statement for ${data.customer}</h1>\n<table>\n<tr><th>play</th><th>seats</th><th>cost</th></tr>`;
+  for(let i=0;i<data.performances.length;i++){
+    result+=` <tr><td>${data.plays[data.performances[i].playID].name}</td><td>${data.performances[i].audience}</td><td>${data.amounts[i]}</td></tr>\n`
+    
   }
-  return result += renderEnding(caculateTotalAmount(invoice, plays), caculateCredit(invoice, plays));
+  result+=`</table>\n<p>Amount owed is <em>${formatUSD(data.totalAmount)}</em></p>\n<p>You earned <em>${data.totalCredit}</em> credits</p>\n`
+  return result;
 }
 
 
 module.exports = {
-  statement,
+  statement,statementHtml
 };

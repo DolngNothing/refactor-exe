@@ -1,5 +1,5 @@
 const test = require('ava');
-const { statement } = require('../src/statement');
+const { statement ,statementHtml} = require('../src/statement');
 
 test('case1 ', t => {
   //given
@@ -31,7 +31,6 @@ test('case1 ', t => {
   //then
   t.is(result, expectResult);
 });
-
 
 test('case2 without performance ', t => {
   //given
@@ -65,7 +64,6 @@ test('case3 one performance and audience is 30', t => {
   t.is(result, expectResult);
 });
 
-
 test('case4 one performance hamlet and audience is 31', t => {
   //given
   const invoice = {
@@ -84,7 +82,6 @@ test('case4 one performance hamlet and audience is 31', t => {
   //then
   t.is(result, expectResult);
 });
-
 
 test('case5 one performance aslike and audience is 20', t => {
   //given
@@ -141,6 +138,38 @@ test('case7 one unknown performance', t => {
     t.is(e.message,`unknown type: tragedyX`)
   }
   
+});
+
+test('case8 html', t => {
+  const invoice = {
+    'customer': 'BigCo',
+    'performances': [
+        {
+            'playID': 'hamlet',
+            'audience': 55,
+        },
+        {
+            'playID': 'as-like',
+            'audience': 35,
+        },
+        {
+            'playID': 'othello',
+            'audience': 40,
+        },
+    ],
+};
+//when
+const result = statementHtml(invoice, plays);
+//then
+t.is(result, '<h1>Statement for BigCo</h1>\n' +
+    '<table>\n' +
+    '<tr><th>play</th><th>seats</th><th>cost</th></tr>' +
+    ' <tr><td>Hamlet</td><td>55</td><td>$650.00</td></tr>\n' +
+    ' <tr><td>As You Like It</td><td>35</td><td>$580.00</td></tr>\n' +
+    ' <tr><td>Othello</td><td>40</td><td>$500.00</td></tr>\n' +
+    '</table>\n' +
+    '<p>Amount owed is <em>$1,730.00</em></p>\n' +
+    '<p>You earned <em>47</em> credits</p>\n');
 });
 
 
