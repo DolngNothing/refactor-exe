@@ -28,31 +28,38 @@ formatUSD = (thisAmount) => {
   }).format(thisAmount / 100)
 }
 
-caculateCredit = (audience, play) => {
-  let credit=0;
-  credit += Math.max(audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if ('comedy' === play.type) credit += Math.floor(audience / 5);
-    return credit;
+caculateCredit = (invoice,plays) => {
+  let totalCredit=0;
+  for(let perf of invoice.performances){
+    let credit=0;
+    const play = plays[perf.playID];
+    credit += Math.max(perf.audience - 30, 0);
+      // add extra credit for every ten comedy attendees
+      if ('comedy' === play.type) credit += Math.floor(perf.audience / 5);
+
+      totalCredit+=credit;
+  }
+  return totalCredit
+}
+
+renderEnding = (result,totalAmount,volumeCredits) => {
+  result += `Amount owed is ${formatUSD(totalAmount)}\n`;
+  result += `You earned ${volumeCredits} credits \n`;
+  return result;
 }
 
 function statement(invoice, plays) {
   let totalAmount = 0;
-  let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
     thisAmount = caculateAmount(perf.audience, play);
     totalAmount += thisAmount;
-    // add volume credits
-    volumeCredits += caculateCredit(perf.audience, play);
-    //print line for this order
     result += ` ${play.name}: ${formatUSD(thisAmount)} (${perf.audience} seats)\n`;
   }
-  result += `Amount owed is ${formatUSD(totalAmount)}\n`;
-  result += `You earned ${volumeCredits} credits \n`;
-  return result;
+  return renderEnding(result,totalAmount,caculateCredit(invoice, plays));
 }
+
 
 module.exports = {
   statement,
