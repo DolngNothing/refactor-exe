@@ -25,9 +25,16 @@ formatUSD = (thisAmount) => {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
-  }).format(thisAmount/100)
+  }).format(thisAmount / 100)
 }
 
+caculateCredit = (audience, play) => {
+  let credit=0;
+  credit += Math.max(audience - 30, 0);
+    // add extra credit for every ten comedy attendees
+    if ('comedy' === play.type) credit += Math.floor(audience / 5);
+    return credit;
+}
 
 function statement(invoice, plays) {
   let totalAmount = 0;
@@ -38,9 +45,7 @@ function statement(invoice, plays) {
     thisAmount = caculateAmount(perf.audience, play);
     totalAmount += thisAmount;
     // add volume credits
-    volumeCredits += Math.max(perf.audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if ('comedy' === play.type) volumeCredits += Math.floor(perf.audience / 5);
+    volumeCredits += caculateCredit(perf.audience, play);
     //print line for this order
     result += ` ${play.name}: ${formatUSD(thisAmount)} (${perf.audience} seats)\n`;
   }
