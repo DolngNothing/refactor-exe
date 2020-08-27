@@ -84,13 +84,11 @@ createData=(invoice, plays)=>{
 }
 
 function statement(invoice, plays) {
-  data=createData(invoice, plays);
-  return renderTxt(data);
+  return renderTxt(createData(invoice, plays));
 }
 
 function statementHtml(invoice, plays){
-  data=createData(invoice, plays);
-  return renderHtml(data);
+  return renderHtml(createData(invoice, plays));
 }
 
 renderHtml = (data) =>{
